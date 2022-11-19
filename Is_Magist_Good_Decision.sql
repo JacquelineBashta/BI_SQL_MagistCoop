@@ -57,19 +57,34 @@ where ( product_category_name_english like "%phon%"
         or product_category_name_english like "%audio%"
         or product_category_name_english like "%dvd%"
         or product_category_name_english like "%electronic%")
-        -- and (product_length_cm < 15 and product_height_cm < 15 and product_height_cm < 15)
-        -- and product_weight_g < 300
-
+        -- and (product_length_cm < 25 and product_height_cm < 15 and product_height_cm < 25)
+        -- and product_weight_g < 500
 group by product_category_name_english
 -- having avg(price) > 300
 order by avg(price) desc
+;
+
+select product_length_cm,product_height_cm,product_width_cm,product_weight_g/1000,price
+from product_category_name_translation
+join products		using (product_category_name)
+join order_items	using (product_id)
+where ( product_category_name_english = "computers")
+order by (price) desc
+;
+
+select product_length_cm,product_height_cm,product_width_cm,product_weight_g/1000,price
+from product_category_name_translation
+join products		using (product_category_name)
+join order_items	using (product_id)
+where ( product_category_name_english = "telephony")
+order by (price) desc
 ;
 -- **Result**: out of 74 category of products, there are only 11 category related to electronics,phones..
 					-- Reproduce: Exclude having avg(price) > 500
 -- **Result**: out of these 11 Category there are only 1 category that have products with averge prices >500
 --                    High_Tech are of product_category_name_english = 'computers'
 
-
+-- check the max/Min prices in computer range
 -- ------------------------------------------------------------------------ 
 -- 2. Percentage of High Tech products : how much % of total products sold are from High_Tech categories
 with tech_items_Sold_q as(
@@ -180,6 +195,7 @@ from delay_Period_q
 -- where Delay_Period = "within a Week"  -- 3186/7826 
 where Delay_Period = "within a Day"  -- 1292/7826 
 ;
+
 -- TODO relation between delay and (product size , also number of items/order)
 -- ------------------------------------------------------------------------ 
 -- 2. Get percentage of satisfied customer reviews
