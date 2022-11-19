@@ -2,16 +2,16 @@
 #############################################  Question (A) #######################################################
 ########### Is Magist a good fit for high-end tech products?
 ## Answer : NO! 
-# Magist has 74 product Categories , only 8 of them are technolgy related 
+# Magist has 74 product Categories , only 11 of them are technolgy related 
 	# Not enough experience with Electronics and technolgy products
-# From these 8 Categories , only 1 Categories has Items of average price Higher than 300
+# From these 11 Categories , only 1 Categories has Items of average price Higher than 300
 	# Not enough Knowledge regarding handling high end products/ related customers
 
-# out of total Items sold (~ 13K) there were only 260 Items that are of High_Tech Type --> ie 0.23%
+# out of total Items sold (~ 113K) there were only 202 Items that are of High_Tech Type --> ie 0.23%
 	# Market places have no enough demand for High_Tech products
     
 # Only 1.78% of the company Revenue are from High_Tech product Items!!
-	# Company future startegy/plan might not give High_Tech product a priority.
+	# Company future startegy/plan might not consider High_Tech product as a priority.
 
 ######################################    Question (B)     ########################################################
 ########## Are orders delivered on time?
@@ -29,7 +29,6 @@
 # The customer review data indicate consistant customer satisfaction with average score of 4.0/5.0 , which is not really 
 # consistant with the delivery speed data!
 # further more 98.8% of all orders are reviewed!
-## Is Magist familiar with Brazilian market?
 -- ---------------------------------------------------------------------------------------------------------------------
 ######################################  Detailed Analysis  #############################################################
 -- ---------------------------------------------------------------------------------------------------------------------
@@ -47,35 +46,42 @@ from product_category_name_translation;
 
 -- ii. Number of category with High_Tech
 select product_category_name_english
-		, round(avg(price))
+	, round(avg(price))
 from product_category_name_translation
-join products using (product_category_name)
--- join order_items using (product_id)
-where ( product_category_name_english like "%phon%" or 
-        product_category_name_english like "%computer%" or
-        product_category_name_english like "%tablet%" or
-		product_category_name_english like "%game%" or
-        product_category_name_english like "%electronic%")
+join products		using (product_category_name)
+join order_items	using (product_id)
+where ( product_category_name_english like "%phon%" 
+        or product_category_name_english like "%computer%" 
+		or product_category_name_english like "%tablet%" 
+		or product_category_name_english like "%game%" 
+        or product_category_name_english like "%audio%"
+        or product_category_name_english like "%dvd%"
+        or product_category_name_english like "%electronic%")
+        -- and (product_length_cm < 15 and product_height_cm < 15 and product_height_cm < 15)
+        -- and product_weight_g < 300
 
 group by product_category_name_english
 -- having avg(price) > 300
-order by price desc
+order by avg(price) desc
 ;
--- **Result**: out of 74 category of products, there are only 8 category related to electronics,phones..
-					-- Reproduce: Exclude having avg(price) > 300
--- **Result**: out of these 8 Category there are only 1 category that have products with averge prices >300
+-- **Result**: out of 74 category of products, there are only 11 category related to electronics,phones..
+					-- Reproduce: Exclude having avg(price) > 500
+-- **Result**: out of these 11 Category there are only 1 category that have products with averge prices >500
 --                    High_Tech are of product_category_name_english = 'computers'
 
 
 -- ------------------------------------------------------------------------ 
 -- 2. Percentage of High Tech products : how much % of total products sold are from High_Tech categories
 with tech_items_Sold_q as(
-select count(product_id) as High_Tech_Items_Sold 
-		, (select count(product_id) from order_items) as All_Items_Sold
+select count(order_item_id) as High_Tech_Items_Sold 
+		## TODO : add the order_status condition as != cancelled
+		,(select count(order_item_id) from order_items) as All_Items_Sold
 from product_category_name_translation
-join products using (product_category_name)
-join order_items using (product_id)
-where product_category_name_english in  ("computers") 
+join products 		using (product_category_name)
+join order_items 	using (product_id)
+where product_category_name_english in  ("computers")
+	-- and (product_length_cm < 15 and product_height_cm < 15 and product_height_cm < 15)
+	-- and product_weight_g < 300
 	and price > 300
 
 order by price desc
@@ -85,6 +91,13 @@ from tech_items_Sold_q;
 
 -- **Result**: out of around 113k Items sold, only 202 was of High_Tech Items! (0.18%) !!
 -- ------------------------------------------------------------------------ 
+-- Average price of all sold products
+select round(avg(price))
+from order_items
+where order_item_id is not null; -- 121 
+
+-- ------------------------------------------------------------------------ 
+
 -- 3. Percentage of High Tech products Revenue: how much % of total sold products price are from High_Tech categories
 with tech_items_Sold_q as(
 select round(sum(price + freight_value)) as High_Tech_Items_Total_price
@@ -101,7 +114,7 @@ from tech_items_Sold_q;
 -- **Result**: 1.47% of the comapny Revenue are from High_Tech product Items!!
 
 #################################    Question (B)     ###############################################
--- 1. How fast Magist process is ? (Considering time between purchasing an order until delivering it)
+-- TODO : 1. How fast Magist process is ? (Considering time between purchasing an order until delivering it)
 
 
 
@@ -160,13 +173,14 @@ select *
 	end as Delay_Period
 from delayed_days_q
 )
-select count(*)
+select count(*) as order_delayed
 from delay_Period_q
 -- where Delay_Period = "1+ Months"  -- 360/7826 
 -- where Delay_Period = "within a Month"  -- 2988/7826 
 -- where Delay_Period = "within a Week"  -- 3186/7826 
 where Delay_Period = "within a Day"  -- 1292/7826 
 ;
+-- TODO relation between delay and (product size , also number of items/order)
 -- ------------------------------------------------------------------------ 
 -- 2. Get percentage of satisfied customer reviews
 -- i. Get average score over months/years
@@ -184,6 +198,7 @@ select   year(review_creation_date)
  ;
  -- **Result**: Overall average score is 4.0/5.0 --> and its stable -consistance over years and months
  -- Actually reviews indicate "surprsingly" an overall customer satisfaction
+ -- TODO : check delays related product with small size + high price??
  
  -- ii. Get the percentage of Review contributers ( number of orders which has reviews / number of overall orders)
  select count(distinct order_id) as reviewed_orders
@@ -194,10 +209,8 @@ select   year(review_creation_date)
  
  
  #################################    Extra     ###############################################
--- Is Magist familiar with Brazilian market?
--- 1. Get number of stores per country
- select geo.state , count(distinct seller_id)
- from sellers
- join geo on geo.zip_code_prefix = sellers.seller_zip_code_prefix
- group by geo.state 
- order by count(distinct seller_id) desc;
+select sum(order_item_id)
+from order_items
+group by order_id
+order by 1 desc
+;
