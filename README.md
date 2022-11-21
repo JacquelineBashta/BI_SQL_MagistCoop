@@ -1,7 +1,6 @@
 # SQL_Magist
-first Data analysis via MySQL and Tableau
+Data analysis project via MySQL and Tableau
 
-Project presentation https://docs.google.com/presentation/d/1Vz9m9d7cRlTZZqFalEBb4n0k28Onwxd3JZOh10pCs6U/edit#slide=id.g191e34f3329_0_141
 
 # StoryLine
 ## Eniac The Comapny
@@ -32,9 +31,19 @@ Among Eniac’s efforts to have happy customers, fast deliveries are key. The de
 Thankfully, Magist has allowed Eniac to access a snapshot of their database. The data might have the answer to these concerns. Here’s where you come in: you will be the one exploring Magist’s database. (magist_dump.sql)
 
 # Data File structure
--- magist_dump.sql --> Input DB 
--- magist_basicQuestions --> queries to get used to the DB
--- Is_Magist_Good_Decision.sql --> Queries used to take decision
--- magist_model.mwb --> MySQL WS
--- magist_model.png --> Pic for magist EER Diagram
--- Magist_Tableau.twb --> Magist Tableau WS
+magist_dump.sql --> Input DB.
+
+magist_basicQuestions --> queries to get used to the DB.
+
+Is_Magist_Good_Decision.sql --> Queries used to take decision.
+
+magist_model.mwb --> MySQL WS.
+
+magist_model.png --> Pic for magist EER Diagram.
+
+Magist_Tableau.twb --> Magist Tableau WS.
+
+
+# Project presentation 
+
+https://docs.google.com/presentation/d/1Vz9m9d7cRlTZZqFalEBb4n0k28Onwxd3JZOh10pCs6U/edit#slide=id.g191e34f3329_0_141
