@@ -60,9 +60,10 @@ where ( product_category_name_english like "%phon%"
         -- and (product_length_cm < 25 and product_height_cm < 15 and product_height_cm < 25)
         -- and product_weight_g < 500
 group by product_category_name_english
--- having avg(price) > 300
+having avg(price) > 300
 order by avg(price) desc
 ;
+
 
 select product_length_cm,product_height_cm,product_width_cm,product_weight_g/1000,price
 from product_category_name_translation
@@ -94,10 +95,16 @@ select count(order_item_id) as High_Tech_Items_Sold
 from product_category_name_translation
 join products 		using (product_category_name)
 join order_items 	using (product_id)
-where product_category_name_english in  ("computers")
+where ( product_category_name_english like "%phon%" 
+        or product_category_name_english like "%computer%" 
+		or product_category_name_english like "%tablet%" 
+		or product_category_name_english like "%game%" 
+        or product_category_name_english like "%audio%"
+        or product_category_name_english like "%dvd%"
+        or product_category_name_english like "%electronic%")
 	-- and (product_length_cm < 15 and product_height_cm < 15 and product_height_cm < 15)
 	-- and product_weight_g < 300
-	and price > 300
+	-- and price > 300
 
 order by price desc
 )
@@ -120,8 +127,14 @@ select round(sum(price + freight_value)) as High_Tech_Items_Total_price
 from product_category_name_translation
 join products using (product_category_name)
 join order_items using (product_id)
-where product_category_name_english in  ("computers") 
-	and price > 300
+where ( product_category_name_english like "%phon%" 
+        or product_category_name_english like "%computer%" 
+		or product_category_name_english like "%tablet%" 
+		or product_category_name_english like "%game%" 
+        or product_category_name_english like "%audio%"
+        or product_category_name_english like "%dvd%"
+        or product_category_name_english like "%electronic%")
+	-- and price > 300
 )
 select * , round(((High_Tech_Items_Total_price/All_Items_Total_price)*100),2) as percent_High_Tech_Revenue
 from tech_items_Sold_q;
@@ -192,18 +205,14 @@ select count(*) as order_delayed
 from delay_Period_q
 -- where Delay_Period = "1+ Months"  -- 360/7826 
 -- where Delay_Period = "within a Month"  -- 2988/7826 
--- where Delay_Period = "within a Week"  -- 3186/7826 
-where Delay_Period = "within a Day"  -- 1292/7826 
+where Delay_Period = "within a Week"  -- 3186/7826 
+-- where Delay_Period = "within a Day"  -- 1292/7826 
 ;
 
 -- TODO relation between delay and (product size , also number of items/order)
 -- ------------------------------------------------------------------------ 
 -- 2. Get percentage of satisfied customer reviews
 -- i. Get average score over months/years
--- Get total number of reviews
-select count(review_score)
- FROM magist.order_reviews;
- 
  -- Get average score over months/years
 select   year(review_creation_date)
 		,month(review_creation_date)
@@ -217,13 +226,13 @@ select   year(review_creation_date)
  -- TODO : check delays related product with small size + high price??
  
  -- ii. Get the percentage of Review contributers ( number of orders which has reviews / number of overall orders)
- select count(distinct order_id) as reviewed_orders
- , (select count(distinct order_id) from orders) as all_orders
+ select count(*) as reviewed_orders
+ , (select count(*) from orders) as all_orders
  from order_reviews
- where review_score is not null
+ -- where review_score is not null
  ; -- 98279/99441 = 98.8% of all orders are reviewed!
  
- 
+ select count(distinct order_id) from order_reviews;
  #################################    Extra     ###############################################
 select sum(order_item_id)
 from order_items
